@@ -4,6 +4,8 @@ set(
     src/driver.cpp
     src/service.cpp
     src/options.cpp
+    src/argument_vector.cpp
+    src/functionals.cpp
 )
 
 find_package(CURL CONFIG REQUIRED)

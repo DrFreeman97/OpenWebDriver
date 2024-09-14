@@ -1,6 +1,9 @@
 set(_TEST_SRC 
 
 test/main.cpp
+test/test_service.cpp
+test/test_support.cpp
+
 )
 
 find_package(GTest REQUIRED)
