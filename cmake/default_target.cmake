@@ -6,10 +6,13 @@ set(
     src/options.cpp
     src/argument_vector.cpp
     src/functionals.cpp
+    src/request.cpp
+    src/curl_socket.cpp
 )
 
 find_package(CURL CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 add_library(webdriver STATIC ${WEBDRIVER_SRC_FILES})
 target_compile_options(webdriver PRIVATE -fno-exceptions -Wall)
 target_include_directories(webdriver PUBLIC include) 
-target_link_libraries(webdriver PUBLIC CURL::libcurl)
+target_link_libraries(webdriver PUBLIC CURL::libcurl nlohmann_json::nlohmann_json )

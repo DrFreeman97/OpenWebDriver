@@ -1,6 +1,7 @@
 {
     "dependencies":[
         "curl",
-        "gtest"
+        "gtest",
+        "nlohmann-json"
     ]
 }
