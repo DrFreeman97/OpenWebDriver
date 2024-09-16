@@ -27,19 +27,18 @@ private:
 protected:
   int _port = 0;
   std::string _host{};
-  virtual ArgumentVector get_args() = 0;
+  virtual ArgumentVector get_service_args() = 0;
   std::string _servicePath{};
-  std::string _browserPath{};
-  Service(const std::string &driverpath, const std::string &browserpath);
+  Service(const std::string &driverpath);
 
 public:
   virtual void start();
   virtual void stop();
-  inline Service &setBrowserPath(const std::string path) {
-    _browserPath = path;
+  inline Service& setDriverPath(const std::string& path){
+    _servicePath = path;
     return *this;
-  };
-  inline Service &setHost(const std::string host) {
+  }
+  inline Service &setHost(const std::string& host) {
     _host = host;
     return *this;
   };
@@ -52,18 +51,13 @@ public:
 struct FirefoxService : Service {
 private:
   std::vector<std::string> _allowedHosts{"localhost"};
-  std::string _firefoxPath;
 
 protected:
-  ArgumentVector get_args() override;
-
+  ArgumentVector get_service_args() override;
 public:
   FirefoxService();
 
-  inline FirefoxService &setDriverPath(std::string path) {
-    _servicePath = path;
-    return *this;
-  }
+
 
   inline FirefoxService &setPort(int port) {
     _port = port;
@@ -75,8 +69,5 @@ public:
     return *this;
   }
 
-  inline FirefoxService &setFirefoxPath(std::string path) {
-    _firefoxPath = path;
-    return *this;
-  }
+
 };

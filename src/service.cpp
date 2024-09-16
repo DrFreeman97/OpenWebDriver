@@ -1,8 +1,12 @@
 #include "support/arguments_vector.hpp"
 #include "support/functionals.hpp"
 #include <cstddef>
+#include <cstdio>
+#include <cstdlib>
+#include <filesystem>
 #include <malloc.h>
 #include <service.hpp>
+#include <sys/wait.h>
 #include <vector>
 
 #ifdef _WIN32
@@ -22,13 +26,13 @@ void Service::start() {
       CreateProcess(NULL, const_cast<char *>(_browserPath.c_str()), NULL, NULL,
                     false, 0, NULL, NULL, &process_startup, &process);
   if (!res) {
-    // error should throw?
+    // TODO error should throw?
   }
   _isRunning = true;
 }
 
 void Service::stop() {
-  // should manage errors
+  // TODO should manage errors
   TerminateProcess(process.hProcess, 0);
   WaitForSingleObject(process.hProcess, INFINITE);
   CloseHandle(process.hProcess);
@@ -49,37 +53,51 @@ FirefoxService::FirefoxService()
 #include <unistd.h>
 
 void Service::start() {
-  process = fork();
-  auto args = get_args().argv();
-  char **argv = static_cast<char **>(alloca(args.size()));
-  for (int i = 0; i < args.size(); ++i) {
-    argv[i] = const_cast<char *>(args[i].c_str());
+  // check if service and browser exists
+  if (!std::filesystem::exists(_servicePath)) {
+    // TODO this is an error
+    printf("Error executing driver");
   }
+  process = fork();
+  printf("Process forked");
   if (process == 0) {
+    auto args = get_service_args().argv();
+    char **argv = static_cast<char **>(alloca(args.size()));
+    for (int i = 0; i < args.size(); ++i) {
+      argv[i] = const_cast<char *>(args[i].c_str());
+    }
+    printf("Executing driver");
     execv(_servicePath.c_str(), argv);
   } else if (process == -1) {
-    // this is an error
+    // TODO this is an error
   }
-  _isRunning = true;
+  if (waitpid(process, NULL, WNOWAIT) == -1) {
+    _isRunning = false;
+    // not running
+  } else {
+    _isRunning = true;
+  }
 }
 
 void Service::stop() {
   if (_isRunning) {
+    int stalock = 0;
     process = kill(process, SIGINT);
+    waitpid(process, &stalock, WNOHANG);
   }
 }
 
-FirefoxService::FirefoxService()
-    : Service("/usr/bin/geckodriver"), _firefoxPath("/usr/bin/firefox") {
+FirefoxService::FirefoxService() : Service("/usr/bin/geckodriver") {
   _port = 4444;
 }
 
 #endif
 
-ArgumentVector FirefoxService::get_args() {
+ArgumentVector FirefoxService::get_service_args() {
   ArgumentVector vec{};
   vec.add_argument("--port", _port)
-      .add_argument("--allow-hosts", join(_allowedHosts))
-      .add_argument("--binary", _firefoxPath);
+      .add_argument("--allow-hosts", join(_allowedHosts));
   return vec;
 }
+
+Service::Service(const std::string &driverpath) : _servicePath(driverpath) {}
