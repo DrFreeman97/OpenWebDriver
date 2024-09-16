@@ -1,16 +1,28 @@
 #pragma once
 #include "support/arguments_vector.hpp"
-#include <sched.h>
 #include <string>
 #include <vector>
+#ifdef _WIN32
+#include <processthreadsapi.h>
+#elif __unix__
+#include <sched.h>
+#endif
+
 /**
  * @brief Class for all service, usually this identifies the bridge to start
  *
  */
 struct Service {
+#ifdef _WIN32
+private:
+  PROCESS_INFORMATION process;
+  STARTUPINFO process_startup;
+#elif __unix__
+private:
+  pid_t process;
+#endif
 private:
   bool _isRunning = false;
-  pid_t process = -1;
 
 protected:
   int _port = 0;
@@ -18,11 +30,11 @@ protected:
   virtual ArgumentVector get_args() = 0;
   std::string _servicePath{};
   std::string _browserPath{};
+  Service(const std::string &driverpath, const std::string &browserpath);
 
 public:
   virtual void start();
   virtual void stop();
-  Service(const std::string path);
   inline Service &setBrowserPath(const std::string path) {
     _browserPath = path;
     return *this;
@@ -35,7 +47,6 @@ public:
     _port = port;
     return *this;
   };
-  inline pid_t get_pid() const { return process; }
 };
 
 struct FirefoxService : Service {
