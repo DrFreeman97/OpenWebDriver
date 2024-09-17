@@ -1,8 +1,13 @@
+#include "http/http_socket.hpp"
 #include <cstdio>
+#include <cstring>
+#include <curl/curl.h>
 #include <gtest/gtest.h>
+#include <sstream>
 #include <support/functionals.hpp>
 #include <support/arguments_vector.hpp>
 #include <algorithm>
+#include <variant>
 
 struct stringable{
     int a = 1;
@@ -34,3 +39,17 @@ TEST(TestSupport, test_multi_arg_vector){
     vec.add_argument("--host",true,"localhost","127.0.0.1");
     ASSERT_EQ(vec.argv()[0], "--host localhost --host 127.0.0.1 ");
 }
+
+
+TEST(TestHttpSocket, test_socket_get){
+    auto socket = HttpSocket();
+    std::variant<std::string,CURLcode> res = socket.http_get("https://www.google.com");
+    if (std::holds_alternative<std::string>(res)){
+       auto buf = std::get<std::string>(res);
+       ASSERT_GE(buf.size(), 0);
+    }
+    else{
+        printf("%d\n",std::get<CURLcode>(res));
+    }
+}
+

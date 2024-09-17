@@ -64,14 +64,12 @@ void Service::start() {
     printf("Error executing driver");
   }
   process = fork();
-  printf("Process forked");
   if (process == 0) {
     auto args = get_service_args().argv();
     char **argv = static_cast<char **>(alloca(args.size()));
     for (int i = 0; i < args.size(); ++i) {
       argv[i] = const_cast<char *>(args[i].c_str());
     }
-    printf("Executing driver");
     execv(_servicePath.c_str(), argv);
   } else if (process == -1) {
     // TODO this is an error

@@ -7,7 +7,7 @@ set(
     src/argument_vector.cpp
     src/functionals.cpp
     src/request.cpp
-    src/curl_socket.cpp
+    src/http_socket.cpp
 )
 
 find_package(CURL CONFIG REQUIRED)
