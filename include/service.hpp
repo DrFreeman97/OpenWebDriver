@@ -29,16 +29,16 @@ protected:
   std::string _host{};
   virtual ArgumentVector get_service_args() = 0;
   std::string _servicePath{};
-  Service(const std::string &driverpath);
+  Service();
 
 public:
   virtual void start();
   virtual void stop();
-  inline Service& setDriverPath(const std::string& path){
+  inline Service &setDriverPath(const std::string &path) {
     _servicePath = path;
     return *this;
   }
-  inline Service &setHost(const std::string& host) {
+  inline Service &setHost(const std::string &host) {
     _host = host;
     return *this;
   };
@@ -54,10 +54,9 @@ private:
 
 protected:
   ArgumentVector get_service_args() override;
+
 public:
   FirefoxService();
-
-
 
   inline FirefoxService &setPort(int port) {
     _port = port;
@@ -68,6 +67,4 @@ public:
     _allowedHosts.push_back(host);
     return *this;
   }
-
-
 };

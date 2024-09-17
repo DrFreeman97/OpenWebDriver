@@ -6,7 +6,6 @@
 #include <filesystem>
 #include <malloc.h>
 #include <service.hpp>
-#include <sys/wait.h>
 #include <vector>
 
 #ifdef _WIN32
@@ -22,8 +21,15 @@ void Service::start() {
   ZeroMemory(&process_startup, sizeof(process_startup));
   int ps = sizeof(process_startup);
   process_startup.cb = ps;
+  auto args = get_service_args();
+  auto argvector = args.argv();
+  std::string commandline = _servicePath;
+  for (auto &arg : argvector) {
+    commandline += " " + arg;
+  }
+
   auto res =
-      CreateProcess(NULL, const_cast<char *>(_browserPath.c_str()), NULL, NULL,
+      CreateProcess(NULL, const_cast<char *>(commandline.c_str()), NULL, NULL,
                     false, 0, NULL, NULL, &process_startup, &process);
   if (!res) {
     // TODO error should throw?
@@ -41,15 +47,14 @@ void Service::stop() {
   return;
 }
 
-FirefoxService::FirefoxService()
-    : Service("C:/Geckodriver",
-              "C:/Program Files/Mozilla Firefox/firefox.exe") {}
+FirefoxService::FirefoxService() : Service() {}
 
 #endif
 
 #ifdef __unix__
 #include <csignal>
 #include <sched.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 void Service::start() {
@@ -87,9 +92,7 @@ void Service::stop() {
   }
 }
 
-FirefoxService::FirefoxService() : Service("/usr/bin/geckodriver") {
-  _port = 4444;
-}
+FirefoxService::FirefoxService() : Service() { _port = 4444; }
 
 #endif
 
@@ -100,4 +103,4 @@ ArgumentVector FirefoxService::get_service_args() {
   return vec;
 }
 
-Service::Service(const std::string &driverpath) : _servicePath(driverpath) {}
+Service::Service() : _servicePath() {}
