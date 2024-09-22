@@ -63,14 +63,18 @@ void Service::start() {
     // TODO this is an error
     printf("Error executing driver");
   }
-  process = fork();
+  process = vfork();
   if (process == 0) {
     auto args = get_service_args().argv();
-    char **argv = static_cast<char **>(alloca(args.size()));
-    for (int i = 0; i < args.size(); ++i) {
+    char **argv = static_cast<char **>(alloca(args.size()+2));
+    argv[0] = const_cast<char*>("geckodriver");  //substitute with real driver name
+    for (int i = 1; i < args.size(); ++i) {
       argv[i] = const_cast<char *>(args[i].c_str());
     }
-    execv(_servicePath.c_str(), argv);
+    argv[args.size()] = NULL;
+    execv(_servicePath.c_str(),argv);
+    perror("Should not return \n");
+    exit(-1);
   } else if (process == -1) {
     // TODO this is an error
   }

@@ -2,6 +2,7 @@
     "dependencies":[
         "curl",
         "gtest",
-        "nlohmann-json"
+        "nlohmann-json",
+        "fmt"
     ]
 }
